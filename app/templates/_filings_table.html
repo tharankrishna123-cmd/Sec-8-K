@@ -1,0 +1,66 @@
+<div class="filters">
+  <div class="filter-row">
+    <span class="filter-label">Sector</span>
+    <button
+      class="chip {{ 'active' if not selected_sector else '' }}"
+      hx-get="/filings-table?materiality={{ selected_materiality or '' }}"
+      hx-target="#dashboard-body" hx-push-url="/?materiality={{ selected_materiality or '' }}">
+      All
+    </button>
+    {% for s in sectors %}
+    <button
+      class="chip {{ 'active' if selected_sector == s else '' }}"
+      hx-get="/filings-table?sector={{ s }}&materiality={{ selected_materiality or '' }}"
+      hx-target="#dashboard-body" hx-push-url="/?sector={{ s }}&materiality={{ selected_materiality or '' }}">
+      {{ s }}
+    </button>
+    {% endfor %}
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">Materiality</span>
+    <button
+      class="chip {{ 'active' if not selected_materiality else '' }}"
+      hx-get="/filings-table?sector={{ selected_sector or '' }}"
+      hx-target="#dashboard-body" hx-push-url="/?sector={{ selected_sector or '' }}">
+      All
+    </button>
+    {% for m in materialities %}
+    <button
+      class="chip badge-{{ m|lower }} {{ 'active' if selected_materiality == m else '' }}"
+      hx-get="/filings-table?sector={{ selected_sector or '' }}&materiality={{ m }}"
+      hx-target="#dashboard-body" hx-push-url="/?sector={{ selected_sector or '' }}&materiality={{ m }}">
+      {{ m }}
+    </button>
+    {% endfor %}
+  </div>
+</div>
+
+<table class="filings-table">
+  <thead>
+    <tr>
+      <th>Company</th>
+      <th>Ticker</th>
+      <th>Sector</th>
+      <th>Date Filed</th>
+      <th>Event Type</th>
+      <th>Materiality</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for f in filings %}
+    <tr class="filing-row" hx-get="/filings/{{ f.id }}" hx-target="#detail-panel" hx-swap="innerHTML show:window:top">
+      <td>
+        {{ f.company.name }}
+        {% if not f.company.active %}<span class="inactive-tag">inactive</span>{% endif %}
+      </td>
+      <td class="ticker">{{ f.ticker }}</td>
+      <td><span class="sector-pill sector-{{ f.company.sector|lower|replace(' ', '-') }}">{{ f.company.sector }}</span></td>
+      <td>{{ f.filing_date.strftime("%Y-%m-%d") }}</td>
+      <td>{{ f.event_type }}</td>
+      <td><span class="badge badge-{{ f.materiality|lower }}">{{ f.materiality }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty-state">No filings match these filters yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>

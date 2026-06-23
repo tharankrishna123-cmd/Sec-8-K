@@ -1,0 +1,338 @@
+:root {
+  --bg: #f6f7f9;
+  --card-bg: #ffffff;
+  --border: #e3e6ea;
+  --text: #1a2433;
+  --text-muted: #6b7480;
+  --accent: #1e3a5f;
+
+  --high-bg: #fde8e8;
+  --high-text: #b42318;
+  --medium-bg: #fef3c7;
+  --medium-text: #92660a;
+  --low-bg: #eef0f3;
+  --low-text: #475569;
+
+  --sector-financial-bg: #e3edfb;
+  --sector-financial-text: #1d4e89;
+  --sector-energy-bg: #fce8da;
+  --sector-energy-text: #9a4a14;
+  --sector-technology-bg: #ece4fb;
+  --sector-technology-text: #5b3aa6;
+  --sector-industrials-bg: #e1f1ea;
+  --sector-industrials-text: #146c50;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 20px 32px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brand-mark {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.last-refresh {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 32px 64px;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  width: 88px;
+  flex-shrink: 0;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.chip:hover {
+  border-color: var(--accent);
+}
+
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.chip.badge-high.active { background: var(--high-text); border-color: var(--high-text); }
+.chip.badge-medium.active { background: var(--medium-text); border-color: var(--medium-text); }
+.chip.badge-low.active { background: var(--low-text); border-color: var(--low-text); }
+
+/* Table */
+.filings-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.filings-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fafbfc;
+}
+
+.filings-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.filing-row {
+  cursor: pointer;
+}
+
+.filing-row:hover {
+  background: #fafbfc;
+}
+
+.filing-row:last-child td {
+  border-bottom: none;
+}
+
+.ticker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.inactive-tag {
+  margin-left: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-transform: uppercase;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 16px;
+}
+
+/* Badges & pills */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-high { background: var(--high-bg); color: var(--high-text); }
+.badge-medium { background: var(--medium-bg); color: var(--medium-text); }
+.badge-low { background: var(--low-bg); color: var(--low-text); }
+
+.sector-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.sector-financial-services { background: var(--sector-financial-bg); color: var(--sector-financial-text); }
+.sector-energy { background: var(--sector-energy-bg); color: var(--sector-energy-text); }
+.sector-technology { background: var(--sector-technology-bg); color: var(--sector-technology-text); }
+.sector-industrials { background: var(--sector-industrials-bg); color: var(--sector-industrials-text); }
+
+/* Detail panel */
+.detail-card {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(20, 30, 50, 0.06);
+}
+
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-btn:hover { color: var(--text); }
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.detail-header h2 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.detail-header .ticker {
+  font-size: 14px;
+}
+
+.detail-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  font-size: 13px;
+  margin: 0 0 14px;
+}
+
+.detail-meta dt {
+  color: var(--text-muted);
+}
+
+.detail-meta dd {
+  margin: 0;
+}
+
+.source-link {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  margin-bottom: 6px;
+}
+
+.source-link:hover { text-decoration: underline; }
+
+.company-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: #fafbfc;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 10px 0 0;
+}
+
+.detail-card hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 18px 0;
+}
+
+.generate-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.generate-btn:hover { background: #16304d; }
+
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator { display: block; }
+.htmx-request.htmx-indicator { display: block; }
+
+.memo-loading {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.memo {
+  margin-top: 4px;
+}
+
+.memo-section {
+  margin-bottom: 14px;
+}
+
+.memo-section h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin: 0 0 4px;
+}
+
+.memo-section p {
+  margin: 0;
+}
+
+.memo-disclaimer {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}

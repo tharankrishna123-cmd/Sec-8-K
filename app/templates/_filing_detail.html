@@ -1,0 +1,45 @@
+<div class="detail-card">
+  <button class="close-btn" hx-get="/empty" hx-target="#detail-panel" hx-swap="innerHTML">&times;</button>
+
+  <div class="detail-header">
+    <h2>{{ filing.company.name }} <span class="ticker">{{ filing.ticker }}</span></h2>
+    <span class="badge badge-{{ filing.materiality|lower }}">{{ filing.materiality }}</span>
+  </div>
+
+  <dl class="detail-meta">
+    <dt>Sector</dt><dd>{{ filing.company.sector }}</dd>
+    <dt>Form</dt><dd>{{ filing.form_type }}</dd>
+    <dt>Filed</dt><dd>{{ filing.filing_date.strftime("%Y-%m-%d") }}</dd>
+    <dt>Item code(s)</dt><dd>{{ filing.item_codes or "—" }}</dd>
+    <dt>Event type</dt><dd>{{ filing.event_type }}</dd>
+  </dl>
+
+  <a class="source-link" href="{{ filing.primary_doc_url }}" target="_blank" rel="noopener">
+    View original filing on SEC.gov →
+  </a>
+
+  {% if filing.company.note %}
+  <p class="company-note">{{ filing.company.note }}</p>
+  {% endif %}
+
+  <hr>
+
+  <div id="memo-content">
+    {% if filing.memo_json %}
+      {% set memo = filing.memo_json %}
+      {% include "_memo.html" %}
+    {% else %}
+      <button
+        class="generate-btn"
+        hx-post="/filings/{{ filing.id }}/memo"
+        hx-target="#memo-content"
+        hx-swap="innerHTML"
+        hx-indicator="#memo-loading">
+        Generate analyst memo
+      </button>
+      <div id="memo-loading" class="htmx-indicator memo-loading">
+        Reading the filing and drafting the memo…
+      </div>
+    {% endif %}
+  </div>
+</div>

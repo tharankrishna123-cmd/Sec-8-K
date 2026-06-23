@@ -1,0 +1,28 @@
+databases:
+  - name: sec8k-monitor-db
+    plan: basic-256mb
+    databaseName: sec8kmonitor
+    user: sec8kmonitor
+
+services:
+  - name: sec8k-monitor
+    type: web
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sec8k-monitor-db
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-opus-4-8
+      - key: SEC_USER_AGENT
+        value: "SEC8KMonitor tharankrishna123@gmail.com"
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: REFRESH_INTERVAL_HOURS
+        value: "3"

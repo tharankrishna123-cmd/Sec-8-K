@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">SEC</span> 8-K Equity Monitor
+  </div>
+  <div class="last-refresh">
+    Last refreshed: {{ last_refresh.strftime("%Y-%m-%d %H:%M UTC") if last_refresh else "never" }}
+  </div>
+</header>
+
+<main>
+  <div id="detail-panel"></div>
+  <div id="dashboard-body">
+    {% include "_filings_table.html" %}
+  </div>
+</main>
+{% endblock %}
