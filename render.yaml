@@ -1,6 +1,6 @@
 databases:
   - name: sec8k-monitor-db
-    plan: basic-256mb
+    plan: free
     databaseName: sec8kmonitor
     user: sec8kmonitor
 
@@ -8,7 +8,7 @@ services:
   - name: sec8k-monitor
     type: web
     runtime: python
-    plan: starter
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:

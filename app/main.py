@@ -40,7 +40,13 @@ def _run_refresh() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
-    _run_refresh()
+    db = get_session()
+    try:
+        needs_seed = db.query(FilingModel.id).first() is None
+    finally:
+        db.close()
+    if needs_seed:
+        _run_refresh()  # first deploy only — subsequent cold starts skip this
     scheduler.add_job(_run_refresh, "interval", hours=settings.refresh_interval_hours)
     scheduler.start()
     yield
