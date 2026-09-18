@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import datetime
 import json
 import logging
 import os
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, HTTPException, Request
@@ -20,7 +23,8 @@ from app.models import CompanyModel, FilingModel
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-templates = Jinja2Templates(directory="app/templates")
+_APP_DIR = Path(__file__).parent
+templates = Jinja2Templates(directory=str(_APP_DIR / "templates"))
 templates.env.globals["css_version"] = str(int(time.time()))
 scheduler = BackgroundScheduler()
 
@@ -57,7 +61,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="SEC 8-K Equity Monitor", lifespan=lifespan)
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory=str(_APP_DIR / "static")), name="static")
 
 
 _SECTOR_COLORS = {

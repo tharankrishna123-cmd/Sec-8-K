@@ -4,6 +4,8 @@ Called only when a user clicks into a filing — never during the scheduled
 refresh. The result is cached in filings.memo_json so repeat views are free.
 """
 
+from __future__ import annotations
+
 import datetime
 
 import anthropic

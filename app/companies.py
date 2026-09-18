@@ -5,6 +5,8 @@ they never change. To add or remove a company, edit this list and restart the
 app (or wait for the next scheduled refresh) — no migration needed.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 
