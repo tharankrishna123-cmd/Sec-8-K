@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./sec8k.db"
     refresh_interval_hours: int = 3
     admin_token: str = "change-me"
+    cron_secret: str = ""
 
 
 settings = Settings()
