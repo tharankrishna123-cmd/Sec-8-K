@@ -10,5 +10,16 @@
       "src": "/(.*)",
       "dest": "api/index.py"
     }
+  ],
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/admin/cron-refresh",
+      "schedule": "0 14 * * 1-5"
+    }
   ]
 }

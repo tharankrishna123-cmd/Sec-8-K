@@ -61,7 +61,16 @@
       <td><span class="badge badge-{{ f.materiality|lower }}">{{ f.materiality }}</span></td>
     </tr>
     {% else %}
-    <tr><td colspan="6" class="empty-state">No filings match these filters yet.</td></tr>
+    <tr><td colspan="6" class="empty-state">
+      {% if not selected_sector and not selected_materiality %}
+        No data loaded yet.
+        <form method="POST" action="/admin/load-initial" style="display:inline;margin-left:.75rem">
+          <button type="submit" class="chip active">Load SEC data (~30s)</button>
+        </form>
+      {% else %}
+        No filings match these filters.
+      {% endif %}
+    </td></tr>
     {% endfor %}
   </tbody>
 </table>

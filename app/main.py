@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
         needs_seed = db.query(FilingModel.id).first() is None
     finally:
         db.close()
-    if needs_seed:
+    if needs_seed and not os.environ.get("VERCEL"):
         _run_refresh()
     if not os.environ.get("VERCEL"):
         scheduler.add_job(_run_refresh, "interval", hours=settings.refresh_interval_hours)
@@ -211,9 +211,27 @@ def admin_refresh(token: str):
 @app.post("/admin/cron-refresh")
 def cron_refresh(request: Request):
     auth = request.headers.get("Authorization", "")
-    if not settings.cron_secret or auth != f"Bearer {settings.cron_secret}":
+    if settings.cron_secret and auth != f"Bearer {settings.cron_secret}":
         raise HTTPException(status_code=403, detail="Forbidden")
     global _last_refresh
     result = ingest.refresh_all()
     _last_refresh = datetime.datetime.utcnow()
     return result
+
+
+@app.post("/admin/load-initial", response_class=HTMLResponse)
+def load_initial(request: Request):
+    """First-time data load — only works when the DB is empty, so safe to leave public."""
+    db = get_session()
+    try:
+        if db.query(FilingModel.id).first() is not None:
+            return HTMLResponse("Data already loaded — reload the main page.", status_code=200)
+    finally:
+        db.close()
+    global _last_refresh
+    result = ingest.refresh_all()
+    _last_refresh = datetime.datetime.utcnow()
+    added = result.get("added", 0)
+    return HTMLResponse(
+        f"<p>Loaded {added} filings. <a href='/'>Go to dashboard →</a></p>"
+    )
