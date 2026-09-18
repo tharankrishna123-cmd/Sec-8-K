@@ -10,11 +10,5 @@
       "src": "/(.*)",
       "dest": "api/index.py"
     }
-  ],
-  "crons": [
-    {
-      "path": "/admin/cron-refresh",
-      "schedule": "0 14 * * 1-5"
-    }
   ]
 }
