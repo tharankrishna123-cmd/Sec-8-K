@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from pydantic import field_validator
+from typing import Any
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,10 +17,15 @@ class Settings(BaseSettings):
     admin_token: str = "change-me"
     cron_secret: str = ""
 
-    @field_validator("refresh_interval_hours", mode="before")
+    @model_validator(mode="before")
     @classmethod
-    def _coerce_empty_int(cls, v: object) -> object:
-        return v if v != "" else 3
+    def _drop_empty_env_vars(cls, data: Any) -> Any:
+        # Vercel auto-creates env vars with empty strings for detected field names.
+        # Removing them lets Pydantic fall back to the field defaults instead of
+        # failing to parse "" as int (refresh_interval_hours) or using a bad URL.
+        if isinstance(data, dict):
+            return {k: v for k, v in data.items() if v != ""}
+        return data
 
 
 settings = Settings()
