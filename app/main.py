@@ -189,12 +189,11 @@ def generate_memo(request: Request, filing_id: int):
             raise HTTPException(status_code=404, detail="Filing not found")
         try:
             memo_dict = memo.get_or_generate_memo(db, filing)
-        except Exception as exc:
-            import traceback as _tb
+        except Exception:
             logger.exception("Memo generation failed for filing %s", filing_id)
             return HTMLResponse(
-                f'<pre class="memo-error" style="white-space:pre-wrap;font-size:.8rem">'
-                f"DEBUG: {type(exc).__name__}: {exc}\n\n{_tb.format_exc()}</pre>",
+                '<p class="memo-error">Couldn\'t generate the memo — '
+                "check that ANTHROPIC_API_KEY is set in Vercel environment variables.</p>",
                 status_code=200,
             )
         return templates.TemplateResponse(

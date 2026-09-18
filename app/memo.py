@@ -23,7 +23,10 @@ _client: anthropic.Anthropic | None = None
 def _get_client() -> anthropic.Anthropic:
     global _client
     if _client is None:
-        _client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+        # Pass None when the key is empty so the SDK falls back to reading
+        # ANTHROPIC_API_KEY directly from the process environment.
+        key = settings.anthropic_api_key or None
+        _client = anthropic.Anthropic(api_key=key)
     return _client
 
 
