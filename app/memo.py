@@ -3,10 +3,10 @@
 Called only when a user clicks into a filing — never during the scheduled
 refresh. The result is cached in filings.memo_json so repeat views are free.
 """
-
 from __future__ import annotations
 
 import datetime
+import logging
 
 import anthropic
 from pydantic import BaseModel, Field
@@ -14,6 +14,8 @@ from pydantic import BaseModel, Field
 from app import edgar
 from app.config import settings
 from app.models import FilingModel
+
+logger = logging.getLogger(__name__)
 
 _client: anthropic.Anthropic | None = None
 
@@ -23,6 +25,7 @@ def _get_client() -> anthropic.Anthropic:
     if _client is None:
         _client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
     return _client
+
 
 SYSTEM_PROMPT = """You are a sell-side equity research analyst writing a short internal \
 memo about one company's SEC filing for a portfolio manager who has limited time. \
@@ -41,18 +44,33 @@ Filing text:
 {filing_text}
 ---
 
-Write a short analyst memo with exactly three parts:
-1. What happened — a plain-language summary of the disclosed event, 2-4 sentences.
-2. Why it matters — the business/competitive/industry context that makes this significant \
-(or explicitly not significant), 2-4 sentences.
-3. Thesis impact — build directly on the specific facts from parts 1 and 2. Name the \
-mechanism at stake (e.g. earnings trajectory, capital allocation, management continuity, \
-balance sheet, regulatory exposure, competitive position). State a clear verdict — \
-bullish, bearish, or neutral — and justify it with specific evidence from the filing, \
-not a generic characterisation of the filing type. If neutral, explain precisely why \
-the disclosed facts do not move the needle (e.g. the sum is less than 1% of revenue, \
-the departure comes with a named successor, terms are within normal course of business).
-"""
+Write a short analyst memo using the submit_memo tool. Fill all three fields."""
+
+_MEMO_TOOL = {
+    "name": "submit_memo",
+    "description": "Submit the completed analyst memo with all three sections.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "what_happened": {
+                "type": "string",
+                "description": "Plain-language summary of the disclosed event, 2-4 sentences.",
+            },
+            "why_it_matters": {
+                "type": "string",
+                "description": "Business/competitive/industry context and significance, 2-4 sentences.",
+            },
+            "thesis_impact": {
+                "type": "string",
+                "description": (
+                    "How this updates an equity thesis. Name the mechanism, state a clear "
+                    "verdict (bullish/bearish/neutral), and justify with specific evidence."
+                ),
+            },
+        },
+        "required": ["what_happened", "why_it_matters", "thesis_impact"],
+    },
+}
 
 
 class AnalystMemo(BaseModel):
@@ -75,15 +93,20 @@ def _generate(filing: FilingModel) -> AnalystMemo:
         filing_text=filing_text,
     )
 
-    response = _get_client().messages.parse(
+    response = _get_client().messages.create(
         model=settings.anthropic_model,
-        max_tokens=4096,
-        thinking={"type": "adaptive"},
+        max_tokens=2048,
         system=SYSTEM_PROMPT,
+        tools=[_MEMO_TOOL],
+        tool_choice={"type": "tool", "name": "submit_memo"},
         messages=[{"role": "user", "content": user_prompt}],
-        output_format=AnalystMemo,
     )
-    return response.parsed_output
+
+    for block in response.content:
+        if hasattr(block, "type") and block.type == "tool_use":
+            return AnalystMemo(**block.input)
+
+    raise RuntimeError("Model did not call submit_memo tool")
 
 
 def get_or_generate_memo(db, filing: FilingModel) -> dict:
