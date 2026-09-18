@@ -1,17 +1,14 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
-  ],
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 60,
-      "includeFiles": "app/**"
-    }
-  },
-  "crons": [
+  "builds": [
     {
-      "path": "/admin/cron-refresh",
-      "schedule": "0 14 * * 1-5"
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
     }
   ]
 }
