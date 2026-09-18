@@ -13,7 +13,14 @@ from app import edgar
 from app.config import settings
 from app.models import FilingModel
 
-_client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+_client: anthropic.Anthropic | None = None
+
+
+def _get_client() -> anthropic.Anthropic:
+    global _client
+    if _client is None:
+        _client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+    return _client
 
 SYSTEM_PROMPT = """You are a sell-side equity research analyst writing a short internal \
 memo about one company's SEC filing for a portfolio manager who has limited time. \
@@ -66,7 +73,7 @@ def _generate(filing: FilingModel) -> AnalystMemo:
         filing_text=filing_text,
     )
 
-    response = _client.messages.parse(
+    response = _get_client().messages.parse(
         model=settings.anthropic_model,
         max_tokens=4096,
         thinking={"type": "adaptive"},
