@@ -1,3 +1,5 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -5,11 +7,12 @@ from app.companies import COMPANIES
 from app.config import settings
 from app.models import Base, CompanyModel
 
-# Render (and some other hosts) hand out "postgres://" URLs, but SQLAlchemy 2.x
-# requires the "postgresql://" scheme for the same driver.
 _db_url = settings.database_url
 if _db_url.startswith("postgres://"):
     _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+# Vercel's working directory is read-only; SQLite must live in /tmp
+if os.environ.get("VERCEL") and _db_url.startswith("sqlite:///./"):
+    _db_url = "sqlite:////tmp/sec8k.db"
 
 _connect_args = {"check_same_thread": False} if _db_url.startswith("sqlite") else {}
 engine = create_engine(_db_url, connect_args=_connect_args)
