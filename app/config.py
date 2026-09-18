@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +14,11 @@ class Settings(BaseSettings):
     refresh_interval_hours: int = 3
     admin_token: str = "change-me"
     cron_secret: str = ""
+
+    @field_validator("refresh_interval_hours", mode="before")
+    @classmethod
+    def _coerce_empty_int(cls, v: object) -> object:
+        return v if v != "" else 3
 
 
 settings = Settings()
