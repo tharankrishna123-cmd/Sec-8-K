@@ -19,7 +19,10 @@ SYSTEM_PROMPT = """You are a sell-side equity research analyst writing a short i
 memo about one company's SEC filing for a portfolio manager who has limited time. \
 Be precise and direct. Ground every claim in the filing text provided — if the text \
 doesn't support a claim, say so rather than speculating. Avoid hedging filler like \
-"it is worth noting" or "this could potentially." Write in plain, confident prose."""
+"it is worth noting" or "this could potentially." Write in plain, confident prose. \
+The three sections must form a coherent chain of reasoning: the thesis impact must \
+follow logically and explicitly from the specific facts you established in the first \
+two sections — never from generic assumptions about the filing type."""
 
 USER_PROMPT_TEMPLATE = """Company: {name} ({ticker}), sector: {sector}
 Filing: Form {form_type}, filed {filing_date}, item code(s): {item_codes} ({event_type})
@@ -33,8 +36,13 @@ Write a short analyst memo with exactly three parts:
 1. What happened — a plain-language summary of the disclosed event, 2-4 sentences.
 2. Why it matters — the business/competitive/industry context that makes this significant \
 (or explicitly not significant), 2-4 sentences.
-3. Thesis impact — how this should update an equity investment view on {ticker}: bullish, \
-bearish, or neutral, and why, 2-4 sentences.
+3. Thesis impact — build directly on the specific facts from parts 1 and 2. Name the \
+mechanism at stake (e.g. earnings trajectory, capital allocation, management continuity, \
+balance sheet, regulatory exposure, competitive position). State a clear verdict — \
+bullish, bearish, or neutral — and justify it with specific evidence from the filing, \
+not a generic characterisation of the filing type. If neutral, explain precisely why \
+the disclosed facts do not move the needle (e.g. the sum is less than 1% of revenue, \
+the departure comes with a named successor, terms are within normal course of business).
 """
 
 

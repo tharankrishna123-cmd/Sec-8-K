@@ -10,9 +10,88 @@
 </header>
 
 <main>
+  <section class="trend-section">
+    <div class="section-header">
+      <h2 class="section-title">Sector filing activity</h2>
+      <span class="section-sub">number of 8-K / 6-K filings filed per month · last 6 months</span>
+    </div>
+    <div class="trend-card">
+      <canvas id="sector-trend" height="110"></canvas>
+    </div>
+  </section>
+
   <div id="detail-panel"></div>
+
   <div id="dashboard-body">
     {% include "_filings_table.html" %}
   </div>
 </main>
+
+<script>
+(function () {
+  var td = {{ trend_data | safe }};
+  var ctx = document.getElementById('sector-trend');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: td.labels,
+      datasets: td.datasets.map(function (d) {
+        return {
+          label: d.label,
+          data: d.data,
+          borderColor: d.color,
+          backgroundColor: 'transparent',
+          pointBackgroundColor: d.color,
+          pointBorderColor: 'transparent',
+          tension: 0.35,
+          borderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        };
+      })
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: '#64748b',
+            usePointStyle: true,
+            pointStyleWidth: 8,
+            boxHeight: 8,
+            font: { size: 11 },
+            padding: 16,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1a2235',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#e2e8f0',
+          bodyColor: '#94a3b8',
+          padding: 12,
+        }
+      },
+      scales: {
+        x: {
+          border: { display: false },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#475569', font: { size: 11 } }
+        },
+        y: {
+          border: { display: false },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#475569', font: { size: 11 } },
+          title: { display: true, text: 'Filings filed', color: '#4b5563', font: { size: 11 } },
+          min: 0
+        }
+      }
+    }
+  });
+})();
+</script>
 {% endblock %}

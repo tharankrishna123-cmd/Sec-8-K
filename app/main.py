@@ -1,5 +1,7 @@
 import datetime
+import json
 import logging
+import time
 from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -18,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory="app/templates")
+templates.env.globals["css_version"] = str(int(time.time()))
 scheduler = BackgroundScheduler()
 
 MATERIALITIES = ["High", "Medium", "Low"]
@@ -48,6 +51,52 @@ app = FastAPI(title="SEC 8-K Equity Monitor", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
+_SECTOR_COLORS = {
+    "Financial Services": "#60a5fa",
+    "Energy": "#fb923c",
+    "Technology": "#a78bfa",
+    "Industrials": "#2dd4bf",
+}
+
+
+def _sector_trend_data(db) -> str:
+    """Monthly filing counts per sector for the last 6 months, as JSON for Chart.js."""
+    today = datetime.date.today()
+    month_keys: list[str] = []
+    for i in range(5, -1, -1):
+        m, y = today.month - i, today.year
+        while m <= 0:
+            m += 12
+            y -= 1
+        month_keys.append(f"{y}-{m:02d}")
+
+    cutoff = datetime.date(int(month_keys[0][:4]), int(month_keys[0][5:7]), 1)
+    rows = (
+        db.query(FilingModel.filing_date, CompanyModel.sector)
+        .join(CompanyModel)
+        .filter(FilingModel.filing_date >= cutoff)
+        .all()
+    )
+
+    counts: dict[str, dict[str, int]] = {
+        s: {m: 0 for m in month_keys} for s in SECTORS
+    }
+    for filing_date, sector in rows:
+        mk = filing_date.strftime("%Y-%m")
+        if sector in counts and mk in counts[sector]:
+            counts[sector][mk] += 1
+
+    labels = [
+        datetime.date(int(m[:4]), int(m[5:7]), 1).strftime("%b %Y")
+        for m in month_keys
+    ]
+    datasets = [
+        {"label": s, "data": list(counts[s].values()), "color": _SECTOR_COLORS[s]}
+        for s in SECTORS
+    ]
+    return json.dumps({"labels": labels, "datasets": datasets})
+
+
 def _filtered_filings(db, sector: str, materiality: str) -> list[FilingModel]:
     query = db.query(FilingModel).join(CompanyModel)
     if sector:
@@ -72,6 +121,7 @@ def index(request: Request, sector: str = "", materiality: str = ""):
                 "selected_sector": sector,
                 "selected_materiality": materiality,
                 "last_refresh": _last_refresh,
+                "trend_data": _sector_trend_data(db),
             },
         )
     finally:
